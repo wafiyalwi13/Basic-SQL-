@@ -1,0 +1,75 @@
+# SQL Murder Mystery
+
+-- SQL Query
+// findings from queries that need to take action by asking what next to do
+
+A crime has taken place and the detective needs your help. The detective gave you the crime scene report, but you somehow lost it. 
+You vaguely remember that the crime was a ​murder​ that occurred sometime on ​Jan.15, 2018​ and that it took place in ​SQL City​. 
+Start by retrieving the corresponding crime scene report from the police department’s database.
+
+–- find the report for the crime scene
+SELECT *
+FROM crime_scene_report
+WHERE date = 20180115 and type = 'murder' and city = 'SQL City'
+
+//findings from report
+Description;
+Security footage shows that there were 2 witnesses.
+ The first witness lives at the last house on "Northwestern Dr". 
+The second witness, named Annabel, lives somewhere on "Franklin Ave".
+
+-- understand what data is in person
+SELECT *
+FROM person
+
+-- find Annabel in detail 
+SELECT *
+FROM person
+ORDER BY name asc
+
+-– what is in drivers license?
+SELECT *
+FROM drivers_license
+
+-- what is with facebook event checkin
+SELECT *
+FROM facebook_event_checkin
+
+
+
+
+//findings from query
+1st witness
+id : 14887
+name : Morty Schapiro
+license id : 118009
+address number : 4919
+address street name : Northwestern Dr
+
+2nd witness
+id : 16371
+name : Annabel Miller
+license id : 490173
+address number : 103
+address street name : Franklin Ave 
+
+-- find event in common
+SELECT *
+FROM facebook_event_checkin
+WHERE date = 20180115 and person_id = 16371
+
+-- View the interviews
+SELECT person.name, interview.transcript
+FROM person JOIN interview
+ON person.id = interview.person_id
+WHERE person.id = 14887 OR person.id = 16371
+
+//findings from interview 
+Morty Schapiro - I heard a gunshot and then saw a man run out. He had a "Get Fit Now Gym" bag.
+The membership number on the bag started with "48Z". Only gold members have those bags.
+The man got into a car with a plate that included "H42W".
+Annabel Miller - I saw the murder happen, and I recognized the killer 
+from my gym when I was working out last week on January the 9th.
+
+
+
