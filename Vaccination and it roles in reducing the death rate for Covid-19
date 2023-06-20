@@ -1,0 +1,117 @@
+Task to investigate ;
+How Vaccination are important in reducing death rate for Covid-19 in Malaysia
+
+Data Set :
+Our World In Data (OWID)
+
+-----------------------
+-- Covid-19 Analysis --
+-----------------------
+
+--View table
+SELECT *
+FROM PortfolioProjects.dbo.covid_deaths;
+
+SELECT *
+FROM PortfolioProjects.dbo.covid_vaccinations;
+
+SELECT *
+FROM PortfolioProjects.dbo.covid_death
+WHERE country = 'Malaysia';
+
+-- It is important to see bigger picture first before start to investigate the data and how to anlayze it
+
+-- #####################
+-- ANALYSIS BY LOCATION
+-- #####################
+
+-- Before digging into our country, we need to understand the other world,region and country benchmark before making comparisons
+
+
+-- 1) Worldwide > Total Cases, Total Deaths & Death Rate by Country and Date
+-- Shows the likelihood of dying if you contract Covid-19
+
+SELECT location, date, total_cases, total_deaths, (total_deaths/total_cases) * 100 AS death_rate
+FROM PortfolioPojects.dbo.covid_deaths
+WHERE continent IS NOT NULL
+ORDER BY location, date;
+
+
+-- 2) Asia > Total Cases, Total Deaths & Death Rate by Country and Date
+-- Shows the likelihood of dying if you contract Covid-19
+
+SELECT location, date, total_cases, total_deaths, (total_deaths/total_cases) * 100 AS death_rate
+FROM [Portfolio Project].[dbo].[Covid_death]
+WHERE continent IS NOT NULL AND continent = 'Asia'
+ORDER BY location, date;
+
+
+-- 3) Malaysia > Total Cases, Total Deaths & Death Rate by Date
+SELECT location, date, total_cases, total_deaths, (total_deaths/total_cases) * 100 AS death_rate
+FROM [Portfolio Project].[dbo].[Covid_death]
+WHERE continent IS NOT NULL AND location = 'Malaysia'
+ORDER BY location, date;
+
+-- 4) Worldwide > Infection Rate per Population by Country & Date
+-- Show the percentage of population contracting Covid-19 at a given date
+SELECT location, date, total_cases, population, (total_cases/population) * 100 AS infection_rate
+FROM [Portfolio Project].[dbo].[Covid_death]
+WHERE continent IS NOT NULL
+ORDER BY location, date;
+
+-- 5) Asia > Infection Rate per Population by Country & Date
+-- Show the percentage of population contracting Covid-19 at a given date
+SELECT location, date, total_cases, population, (total_cases/population) * 100 AS infection_rate
+FROM [Portfolio Project].[dbo].[Covid_death]
+WHERE continent IS NOT NULL and continent = 'Asia'
+ORDER BY location, date;
+
+-- 6) Malaysia > Infection Rate per Population by Date
+-- Show the percentage of population contracting Covid-19 in Malaysia
+SELECT location, date, total_cases, population, (total_cases/population) * 100 AS infection_rate
+FROM [Portfolio Project].[dbo].[Covid_death]
+WHERE location = 'Malaysia'
+ORDER BY date;
+
+-- 7) Worldwide > Countries with Highest Infection Rate compared to Population
+SELECT location, population, MAX(total_cases) AS total_cases, MAX((total_cases/population)) * 100 AS infection_rate
+FROM [Portfolio Project].[dbo].[Covid_death]
+WHERE continent = 'Asia'
+GROUP BY location, population
+ORDER BY infection_rate DESC;
+
+-- 8) Malaysia > Overall Highest Infection Rate in Malaysi
+SELECT location, population, MAX(total_cases) AS total_cases, MAX((total_cases/population)) * 100 AS infection_rate
+FROM [Portfolio Project].[dbo].[Covid_death]
+WHERE location = 'Malaysia'
+GROUP BY location, population
+--ORDER BY infection_rate DESC;
+
+-- 9) Worldwide > Highest Death Count per Population & Death Rate
+SELECT location, population, MAX(total_deaths) AS total_deaths, (MAX(total_deaths)/population) * 100 AS death_rate_by_population
+FROM [Portfolio Project].[dbo].[Covid_death]
+WHERE continent IS NOT NULL
+GROUP BY location, population
+ORDER BY death_rate_by_population DESC;
+
+-- 10) Asia > Highest Death Count per Population & Death Rate
+SELECT location, population, MAX(total_deaths) AS total_deaths, (MAX(total_deaths)/population) * 100 AS death_rate_by_population
+FROM [Portfolio Project].[dbo].[Covid_death]
+WHERE continent IS NOT NULL and continent = 'Asia'
+GROUP BY location, population
+ORDER BY death_rate_by_population DESC;
+
+-- 11) Malaysia > Highest Death Count by Population & Death Rate
+SELECT location, population, MAX(total_deaths) AS total_deaths, 
+	(MAX(total_deaths)/population) * 100 AS death_rate_by_population
+FROM dbo.covid_deaths
+WHERE location = 'Malaysia'
+GROUP BY location, population
+--ORDER BY death_rate_by_population DESC;
+
+-- ########################################
+-- ANALYSIS THE VACCINATION EFFECT VS DEATH
+-- ########################################
+
+
+
