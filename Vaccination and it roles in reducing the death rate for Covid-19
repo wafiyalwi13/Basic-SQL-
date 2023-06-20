@@ -104,7 +104,7 @@ ORDER BY death_rate_by_population DESC;
 -- 11) Malaysia > Highest Death Count by Population & Death Rate
 SELECT location, population, MAX(total_deaths) AS total_deaths, 
 	(MAX(total_deaths)/population) * 100 AS death_rate_by_population
-FROM dbo.covid_deaths
+FROM [Portfolio Project].[dbo].[Covid_death]
 WHERE location = 'Malaysia'
 GROUP BY location, population
 --ORDER BY death_rate_by_population DESC;
@@ -112,6 +112,86 @@ GROUP BY location, population
 -- ########################################
 -- ANALYSIS THE VACCINATION EFFECT VS DEATH
 -- ########################################
+
+-- 12) Worldwide > Rolling Vaccinations by Country & Date
+SELECT d.continent, d.location, d.date, d.population, v.new_vaccinations, 
+	SUM(CONVERT(INT,v.new_vaccinations)) OVER (PARTITION BY d.location
+	ORDER BY d.location, d.date) 
+	AS rolling_vaccinations
+-- Partition by location & date to ensure that once the rolling sum of new vaccinations for a location stops, the rolling sum starts for the next location
+FROM [Portfolio Project].[dbo].[Covid_death] AS d
+JOIN dbo.covid_vaccs AS v
+	ON d.location = v.location 
+AND d.date = v.date
+WHERE d.continent IS NOT NULL
+ORDER BY d.location, d.date;
+
+-- 13) Malaysia > Rolling Vaccinations by Date
+SELECT d.continent, d.location, d.date, d.population, v.new_vaccinations, 
+	SUM(CONVERT(INT,v.new_vaccinations)) OVER (PARTITION BY d.location
+		ORDER BY d.location, d.date) AS rolling_vaccinations
+FROM [Portfolio Project].[dbo].[Covid_death] AS d
+JOIN dbo.covid_vaccs AS v
+	ON d.location = v.location 
+	AND d.date = v.date
+WHERE d.location = 'Malaysia'
+ORDER BY d.location, d.date;
+
+-- Use CTE
+-- 14) Malaysia > Rolling Vaccinations & Percentage of Vaccinated Population
+WITH vaccination_per_population (continent, location, date, population, new_vaccinations, rolling_vaccinations) 
+AS 
+(
+SELECT d.continent, d.location, d.date, d.population, v.new_vaccinations, 
+	SUM(CONVERT(INT,v.new_vaccinations)) OVER (PARTITION BY d.location
+		ORDER BY d.location, d.date) AS rolling_vaccinations
+FROM [Portfolio Project].[dbo].[Covid_death] AS d
+JOIN dbo.covid_vaccs AS v
+	ON d.location = v.location 
+	AND d.date = v.date
+WHERE d.continent IS NOT NULL AND d.location = 'Malaysia'
+)
+SELECT *, (rolling_vaccinations/population) * 100 AS vaccinated_per_population
+FROM vaccination_per_population;
+
+-- Create TEMP TABLE
+DROP TABLE IF EXISTS perc_population_vaccinated
+CREATE TABLE perc_population_vaccinated
+	(
+	continent NVARCHAR(255),
+	location NVARCHAR(255),
+	date DATETIME,
+	population NUMERIC,
+	new_vaccinations NUMERIC,
+	rolling_vaccinations NUMERIC
+	)
+
+-- Insert into TEMP TABLE
+INSERT INTO perc_population_vaccinated
+SELECT d.continent, d.location, d.date, d.population, v.new_vaccinations, 
+	SUM(CONVERT(INT,v.new_vaccinations)) OVER (PARTITION BY d.location
+		ORDER BY d.location, d.date) AS rolling_vaccinations
+FROM [Portfolio Project].[dbo].[Covid_death] AS d
+JOIN dbo.covid_vaccs AS v
+	ON d.location = v.location 
+	AND d.date = v.date
+WHERE d.continent IS NOT NULL
+
+SELECT *, (rolling_vaccinations/population) * 100 AS vaccinated_per_population
+FROM perc_population_vaccinated
+WHERE location = 'Malaysia';
+
+---- Create View to store data for visualisation
+--CREATE VIEW perc_population_vaccinated_view AS
+--SELECT d.continent, d.location, d.date, d.population, v.new_vaccinations, 
+--	SUM(CONVERT(INT,v.new_vaccinations)) OVER (PARTITION BY d.location
+--		ORDER BY d.location, d.date) 
+--		AS rolling_vaccinations
+--FROM [Portfolio Project].[dbo].[Covid_death] AS d
+--JOIN dbo.covid_vaccs AS v
+--	ON d.location = v.location 
+--	AND d.date = v.date
+--WHERE d.continent IS NOT NULL;
 
 
 
